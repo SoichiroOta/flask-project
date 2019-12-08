@@ -1,0 +1,67 @@
+{% extends "_base.html" %}
+{% block content %}
+
+    <h2>{{ user.name }}</h2>
+
+    <div>
+    <div>{{ user.email }}</div>
+    </div>
+
+    <div>
+    <ul>
+        <li><a href="{{ url_for('user.user_edit', user_id=user.id) }}">edit</a></li>
+        <li><a class="user-delete-link" href="#" data-delete-url="{{ url_for('user.user_delete', user_id=user.id) }}" redirect-url="{{ url_for('user.user_list') }}" onclick="onUserDeleteLinkClick()">delete</a></li>
+    </ul>
+    </div>
+
+    <script src="https://unpkg.com/@babel/polyfill@7.4.4/dist/polyfill.min.js"></script>
+    <script src="https://unpkg.com/axios@0.19.0/dist/axios.min.js"></script>
+    <script>
+        // APIクライアント
+        const api = axios.create({
+        baseURL: '',
+        timeout: 5000,
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+        })
+
+        function onUserDeleteLinkClick() {
+            const userDeleteLink = document.getElementsByClassName('user-delete-link')[0]
+            console.log(userDeleteLink.getAttribute('data-delete-url'))
+            api({
+                // 登録済みかどうかでHTTPメソッドとエンドポイントを切り替える
+                method: 'delete',
+                url: userDeleteLink.getAttribute('data-delete-url')
+            })
+                .then(response => {
+                    console.log(response)
+                    if (response.statusText == 'OK') {
+                        window.location = userDeleteLink.getAttribute('redirect-url')
+                    } else {
+                        alert('Delete failed.')
+                    }
+                    })
+                .catch(error => {
+                const status = error.response ? error.response.status : 500
+                if (status === 400) {
+                    // バリデーションNG
+                    console.log([].concat.apply(
+                    [], Object.values(error.response.data)))
+                } else if (status === 401) {
+                    // 認証エラー
+                    console.log('認証エラー')
+                } else if (status === 403) {
+                    // 権限エラー
+                    console.log('権限エラーです。')
+                } else {
+                    // その他のエラー
+                    console.log('想定外のエラーです。')
+                }
+                })
+            return false
+        }
+    </script>
+
+{% endblock content %}

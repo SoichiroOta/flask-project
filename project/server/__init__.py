@@ -48,10 +48,12 @@ def create_app(script_info=None):
     from project.server.user.views import user_blueprint
     from project.server.main.views import main_blueprint
     from project.server.api.views import api_blueprint
+    from project.server.entry.views import entry_blueprint
 
     app.register_blueprint(user_blueprint)
     app.register_blueprint(main_blueprint)
     app.register_blueprint(api_blueprint)
+    app.register_blueprint(entry_blueprint)
 
     # flask login
     from project.server.models import User
